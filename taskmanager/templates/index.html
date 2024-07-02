@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Manager</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <h2>Task Manager</h2>
+    <a href="{% url 'create_task' %}">Create New Task</a>
+    <ul>
+        {% for task in tasks %}
+            <li>
+                {{ task.title }} - {{ task.completed }}
+                <a href="{% url 'update_task' task.pk %}">Edit</a>
+                <a href="{% url 'delete_task' task.pk %}">Delete</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+<script>
+    $(document).ready(function(){
+        $('.task-checkbox').change(function(){
+            var taskId = $(this).data('id');
+            var completed = $(this).is(':checked');
+            $.ajax({
+                url: '{% url "update_task_status" %}',
+                method: 'POST',
+                data: {
+                    'task_id': taskId,
+                    'completed': completed,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    console.log(response.message);
+                }
+            });
+        });
+    });
+</script>
+
+<ul>
+    {% for task in tasks %}
+        <li>
+            <input type="checkbox" class="task-checkbox" data-id="{{ task.id }}" {% if task.completed %}checked{% endif %}>
+            {{ task.title }}
+            <a href="{% url 'update_task' task.pk %}">Edit</a>
+            <a href="{% url 'delete_task' task.pk %}">Delete</a>
+        </li>
+    {% endfor %}
+</ul>
+</body>
+</html>
